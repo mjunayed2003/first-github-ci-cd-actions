@@ -1,0 +1,48 @@
+name: NestJS CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      # ১. কোড checkout 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ২. Node.js সেটআপ 
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      # ৩. Dependencies install করো (package-lock.json অনুযায়ী exact versions)
+      - name: Install dependencies
+        run: pnpm ci
+
+      # ৪. Build করো
+      - name: Build project
+        run: pnpm run build
+
+      # ৫. Unit test run করো
+      - name: Run unit tests
+        run: pnpm run test
+
+      # ৬. (Optional) Test coverage দেখো
+      - name: Run test coverage
+        run: pnpm run test:cov
