@@ -15,34 +15,41 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
-      # ১. কোড checkout করো
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ২. Node.js সেটআপ করো
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: 20.x
 
-      # ৩. Dependencies install করো (package-lock.json অনুযায়ী exact versions)
+      # pnpm আলাদাভাবে setup করতে হয়
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: false
+
+      # এখন cache কাজ করবে
+      - name: Get pnpm store path
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # ৪. Build করো
       - name: Build project
-        run: npm run build
+        run: pnpm run build
 
-      # ৫. Unit test run করো
       - name: Run unit tests
-        run: npm run test
+        run: pnpm run test
 
-      # ৬. (Optional) Test coverage দেখো
       - name: Run test coverage
-        run: npm run test:cov
+        run: pnpm run test:cov
