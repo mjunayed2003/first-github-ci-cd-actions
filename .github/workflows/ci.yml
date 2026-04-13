@@ -20,29 +20,29 @@ jobs:
         node-version: [20.x]
 
     steps:
-      # ১. কোড checkout 
+      # ১. কোড checkout করো
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ২. Node.js সেটআপ 
+      # ২. Node.js সেটআপ করো
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: 'npm'
 
       # ৩. Dependencies install করো (package-lock.json অনুযায়ী exact versions)
       - name: Install dependencies
-        run: pnpm ci
+        run: npm ci
 
       # ৪. Build করো
       - name: Build project
-        run: pnpm run build
+        run: npm run build
 
       # ৫. Unit test run করো
       - name: Run unit tests
-        run: pnpm run test
+        run: npm run test
 
       # ৬. (Optional) Test coverage দেখো
       - name: Run test coverage
-        run: pnpm run test:cov
+        run: npm run test:cov
